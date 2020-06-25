@@ -1,0 +1,61 @@
+<odoo>
+
+    <!-- Wizard delivery-->
+    <record id="view_delivered_wizard"  model="ir.ui.view">
+    <field name="name">wizard.delivered.packaging</field>
+    <field name="model">delivered.packaging</field>
+    <field name="arch" type="xml">
+      <form string="My Form">
+        <sheet>		
+          <group>
+            <field name ="delivered"/>   
+            <field name ="date"/> 
+          </group>      
+        </sheet>
+        <footer>
+          <button name="action_delivered" type="object" string="Add" class="oe_highlight"/>
+            or
+          <button special="cancel" string="Cancel"/>
+        </footer>
+      </form>
+    </field>
+    </record>
+
+    <!-- action windows wizard, de esta forma de puede llamar con una accion -->
+    <!-- <record model="ir.actions.act_window" id="action_open_delivered">
+      <field name="name">delivered packaging</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">delivered.packaging</field>
+      <field name="view_mode">form</field>
+      <field name="view_id" ref="view_delivered_wizard"/>
+      <field name="target">new</field>
+      <field name="context">get_context()</field>
+    </record> -->
+
+    <!-- Wizard Done-->
+    <record id="view_finish_wizard"  model="ir.ui.view">
+    <field name="name">wizard.finish.packaging</field>
+    <field name="model">finish.packaging</field>
+    <field name="arch" type="xml">
+      <form string="My Form">
+        <sheet>		
+          <group>
+            <field name="merma" 
+                readonly="1"
+            />   
+            <field name="motivo"/> 
+          </group> 
+          <group>
+            <field name="make_invoice"/>  
+          </group>     
+        </sheet>
+        <footer>
+          <button name="action_finish" type="object" string="Confirmar" class="oe_highlight"/>
+            or
+          <button special="cancel" string="Cancel"/>
+        </footer>
+      </form>
+    </field>
+    </record>
+
+</odoo>

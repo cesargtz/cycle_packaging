@@ -1,0 +1,173 @@
+<odoo>
+  <data>
+
+  <!-- Cycle packaging line -->
+  <!-- explicit list view definition -->
+    <record model="ir.ui.view" id="cycle_packaging_line_tree">
+      <field name="name">cycle.packaging.line.tree</field>
+      <field name="model">cycle.packaging.line</field>
+      <field name="arch" type="xml">
+        <tree editable="top">
+          <field name="delivered" string="Entregado"/>
+          <field name="date" string="Fehca"/>
+          <field name="pickinkg" string="Movimiento de almacén"/>
+          <button name="delete_line_record"  icon="fa-trash-o"  type="object" />
+        </tree>
+      </field>
+    </record>
+
+    <!-- explicit list view definition -->
+    <record model="ir.ui.view" id="cycle_packaging_list">
+      <field name="name">cycle_packaging list</field>
+      <field name="model">cycle.packaging</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name" string="Folio"/>
+          <field name="sale_order" string="Pedido"/>
+          <field name="partner" string="Cliente"/>
+          <field name="product" string="Producto"/>
+          <field name="quantity" string="Cantidad"/>
+          <field name="pending" string="Pendiente de entrega"/>
+          <!-- <field name="merma" string="Pendiente de entrega"/> -->
+          <field name="date" string="Fecha"/>
+          <field name="state" string="Estado"/>
+        </tree>
+      </field>
+    </record>
+
+    <!-- actions opening views on models -->
+    <record model="ir.actions.act_window" id="cycle_packaging.action_window">
+      <field name="name">Centro de envases</field>
+      <field name="res_model">cycle.packaging</field>
+      <field name="context">{"search_default_pending":1}</field>
+      <field name="view_mode">tree,form,pivot</field>
+    </record>
+
+
+		<!-- sequence -->
+		<record id="seq_type_packaging" model="ir.sequence">
+			<field name="name">cycle packaging sequence</field>
+			<field name="code">reg_code_cycle_packaging_set</field>
+		</record>
+		<record id="seq_cycle_packaging" model="ir.sequence">
+				<field name="name">reg cycle packaging sequence</field>
+				<field name="code">reg_code_cycle_packaging</field>
+				<field name="prefix">CEN/</field>
+				<field name="padding">2</field>
+				<field name="implementation">no_gap</field>
+		</record>
+   
+    <!-- Form -->
+    <!-- class="oe_edit_only" solo visible al editar -->
+      <!-- <button name="%(action_open_delivered)d" type="action" string="Recibir" states="open" class="oe_highlight"/> -->
+	 <record model="ir.ui.view" id="cycle_packaging_form_view">
+			<field name="name">cycle_packaging form</field>
+			<field name="model">cycle.packaging</field>
+			<field name="arch" type="xml">
+				<form>
+				 <header>
+            <button name="action_confirm" type="object" string="Confirmar" states="draft" class="oe_highlight"/>
+            <button name="action_done" type="object" string="Finalizar" states="open" class="btn btn-danger"/>
+            <button name="open_wizard" type="object" string="Recibir" states="open" style="width:100px;" class="btn btn-success"/>
+            <button name="make_invoice" type="object" string="Facturar" states="incomplete" class="btn btn-success"/>
+            <field name="state" widget="statusbar" readonly="1"  nolabel="1"/>
+					</header>
+					<sheet> 
+            <group>
+              <group col="2">
+                <field name="sale_order" string="Pedido" attrs="{'readonly':[('state', 'not in', ['draft'])]}"/>
+                <field name="partner" string="Cliente" readonly="1" attrs="{'readonly':[('state', 'not in', ['draft'])]}"/>
+                 <field name="product" string="Producto" attrs="{'readonly':[('state', 'not in', ['draft'])]}"/>
+              </group>
+              <group col="2">
+                <field name="date" string="Fecha" attrs="{'readonly':[('state', 'not in', ['draft'])]}"/>
+                <field name="quantity" string="Cantidad" attrs="{'readonly':[('state', 'not in', ['draft'])]}"/>
+                <field name="pending" string="Pendiente de entrega" readonly="1" attrs="{'invisible':[('merma','>',0)]}"/>
+                <field name="merma" attrs="{'invisible':[('merma','=',0)]}"/>
+              </group>
+            </group>
+							<notebook>
+									<page string="lineas de entrega">
+											<field name="cycle_packaging_line" attrs="{'readonly':[('state', 'not in', [''])]}"/>
+									</page>
+                  <page string="Finalizado" attrs="{'invisible':[('state', 'not in', ['incomplete'])]}">
+											 <label for="reason" string="Motivo de merma"/>
+                      <field name="reason" />
+                      <group>
+                        <field name="invoice"  readonly="1" attrs="{'invisible':[('invoice', '!=', '')]}"/>
+                      </group>
+									</page>
+							</notebook>
+					</sheet>
+				</form>
+		</field>
+	</record>
+
+   <!-- Menu actions -->
+  <menuitem name="Centro de envases" sequence="3" string="Centro de envases" id="cycle_packaging.menu_list" parent="stock.menu_stock_warehouse_mgmt"
+            action="cycle_packaging.action_window"/>
+
+  <!-- Search Cycling Packagin -->
+  <record model="ir.ui.view" id="cycle_packaging_search">
+  <field name="name">cycle.packaging.search</field>
+  <field name="model">cycle.packaging</field>
+  <field name="arch" type="xml">
+    <search>
+      <field name="name" string="Folio"/>
+      <field name="sale_order" string="Pedido"/>
+      <field name="partner" string="Cliente"/>
+      <separator/>
+      <filter string="Pendientes" name="pending" domain="[('state','=', 'open')]"/>
+      <filter string="Incompletos" name="incomplete" domain="[('state','=', 'incomplete')]"/>
+      <filter string="Terminados" name="finished" domain="[('state','=', 'done')]"/>
+      <separator/>
+      <group string="Group By">
+          <filter name="group_by_order" string="Pedido" context="{'group_by': 'sale_order'}"/>
+          <filter name="group_by_partner" string="Cliente" context="{'group_by': 'partner'}"/>
+          <filter name="group_by_state" string="Estado" context="{'group_by': 'state'}"/>
+          <filter name="group_by_date" string="Fecha" context="{'group_by': 'date'}"/>
+      </group>
+    </search>
+  </field>
+	</record>
+
+
+
+  <!-- Pivot View -->
+  <record id="view_pivot" model="ir.ui.view">
+  <field name="name">Centro de envases</field>
+  <field name="model">cycle.packaging</field>
+  <field name="arch" type="xml">
+      <pivot string="Pivot View">
+          <field name="state" type="col" />
+          <!-- <field name="date" interval="days" -->
+          <field name="sale_order" type="row"/>
+          <field name="quantity" type="measure"/>
+          <field name="pending" type="measure"/>
+      </pivot>
+   </field>
+</record>
+
+
+  
+    <!-- Product.template Inherit -->
+    <record model="ir.ui.view" id="view_product_template_reusable_form">
+      <field name="name">product_template.view_product_reusable_form</field>
+      <field name="model">product.template</field>
+      <field name="inherit_id" ref="product.product_template_only_form_view"/>
+      <field name="arch" type="xml">
+          <field name="barcode" position="before">
+            <field name="reusable" string="Envase reutilizable"/>
+          </field>
+          <xpath expr="//page[@name='general_information']" position="after">
+              <page name="container" string="Envase" attrs="{'invisible':[('reusable', '!=', True)]}">
+                <group>
+                  <field name="container" string="Producto de embalaje"/>
+                </group>
+              </page>
+          </xpath>
+      </field>
+    </record>
+
+  </data>
+</odoo>
